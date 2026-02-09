@@ -1,0 +1,23 @@
+{
+  "name": "backend_ecommerce_fl",
+  "version": "1.0.0",
+  "description": "This is a server backend for ecommerce apps using Flutter (Riverpod)",
+  "main": "app.js",
+  "scripts": {
+    "start": "nodemon app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/idhamaja/server_be_node_ecommerce.git"
+  },
+  "author": "idham ganteng",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/idhamaja/server_be_node_ecommerce/issues"
+  },
+  "homepage": "https://github.com/idhamaja/server_be_node_ecommerce#readme",
+  "dependencies": {
+    "nodemon": "^3.1.11"
+  }
+}
