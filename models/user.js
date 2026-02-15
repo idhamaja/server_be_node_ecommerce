@@ -23,7 +23,7 @@ const userSchema = Schema({
   phone: { type: String, required: true, trim: true },
   isAdmin: { type: Boolean, default: false },
   resetPasswordOtp: Number,
-  resetPasswordOtpExpires: { type: Date, default: Date.now() },
+  resetPasswordOtpExpires: Date,
   wishList: [
     {
       productId: { type: Schema.Types.ObjectId, ref: "Product", required: true },

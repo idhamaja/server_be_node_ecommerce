@@ -21,13 +21,18 @@
     "bcrypt": "^6.0.0",
     "body-parser": "^2.2.2",
     "cors": "^2.8.6",
-    "dotenv": "^17.2.4",
+    "crypto": "^1.0.1",
+    "dotenv": "^17.3.1",
     "express": "^5.2.1",
     "express-validator": "^7.3.1",
     "jsonwebtoken": "^9.0.3",
+    "math": "^0.0.3",
+    "Math": "^0.0.1-security",
     "mongodb": "^7.1.0",
     "mongoose": "^9.2.0",
     "morgan": "^1.10.1",
-    "nodemon": "^3.1.11"
+    "nodemailer": "^8.0.1",
+    "nodemon": "^3.1.11",
+    "transporter": "^0.0.1"
   }
 }

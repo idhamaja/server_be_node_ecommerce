@@ -19,9 +19,9 @@ const validateUser = [
 
 router.post("/login", authController.login);
 router.post("/register", validateUser, authController.register);
-router.get("/verify_token", authController.verifyToken);
-router.post("/forgot_password", authController.forgotPassword);
-router.post("/verify_otp", authController.verifyPasswordResetOTP);
+router.get("/verifyToken", authController.verifyToken);
+router.post("/forgot-password", authController.forgotPassword);
+router.post("/verify-otp", authController.verifyPasswordResetOTP);
 router.post("/reset_password", authController.resetPassword);
 
 module.exports = router;
