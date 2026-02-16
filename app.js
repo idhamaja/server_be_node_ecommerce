@@ -3,6 +3,11 @@ const cors = require("cors");
 const bodyParser = require("body-parser");
 const morgan = require("morgan");
 const mongoose = require("mongoose");
+const authJwt = require("./middlewares/jwt.js");
+const authRouter = require("./routes/auth.js");
+const usersRouter = require("./routes/usersRoutes.js");
+// const adminRouter = require("./routes/adminRoutes.js");
+const errorHandler = require("./middlewares/error_handler.js");
 require("dotenv").config();
 
 const app = express();
@@ -14,13 +19,12 @@ app.use(bodyParser.json());
 app.use(morgan("tiny"));
 app.use(cors());
 
-const authRouter = require("./routes/auth.js");
-
 app.use(`${API}/`, authRouter);
+app.use(`${API}/users`, usersRouter);
+// app.use(`${API}/admin`, adminRouter);
 
-app.get("/", (request, response) => {
-  return response.send("<h1>Welcome Idham Ganteng </h1>");
-});
+app.use(authJwt);
+app.use(errorHandler);
 
 const hostname = process.env.HOSTNAME;
 const port = env.PORT;
