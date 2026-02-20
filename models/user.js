@@ -50,6 +50,9 @@ const userSchema = Schema({
   // waktu kadaluarsa OTP
   resetPasswordOtpExpires: Date,
 
+  //CartProduct relasi ke Cart Produk
+  cart: [{ type: Schema.Types.ObjectId, ref: "CartProduct" }],
+
   //Wishlist adalah array produk favorit user.
   // productId → relasi ke Product collection
   // productName, productImage, productPrice → snapshot data produk

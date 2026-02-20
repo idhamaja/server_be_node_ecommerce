@@ -3,7 +3,8 @@ const { Token } = require("../models/tokens");
 const { User } = require("../models/user");
 
 async function errorHandler(error, req, res, next) {
-  if (error.name === "Unauthorized") {
+  console.log("ERROR OCCURED")
+  if (error.name === "UnauthorizedError") {
     if (!error.message.includes("jwt expired")) {
       return res
         .status(error.status)
