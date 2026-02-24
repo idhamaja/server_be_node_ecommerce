@@ -4,11 +4,16 @@ const express = require("express");
 const morgan = require("morgan");
 const mongoose = require("mongoose");
 require("dotenv").config();
+
 const authJwt = require("./middlewares/jwt.js");
 const errorHandler = require("./middlewares/error_handler.js");
 const authRouter = require("./routes/auth");
 const usersRouter = require("./routes/usersRoutes");
 const adminRouter = require("./routes/adminRoutes");
+// const cartController = require("./controller/cartController");
+const wishListRouter = require("./routes/wishlistRoute");
+const categoriesRoute = require("./routes/categoriesRoute");
+const productsRouter = require("./routes/productsRoute");
 
 const app = express();
 const env = process.env;
@@ -18,14 +23,16 @@ app.use(bodyParser.json());
 app.use(morgan("tiny"));
 app.use(cors());
 
-app.use(errorHandler);
-
 app.use(`${API}/`, authRouter);
-
 app.use(`${API}/users`, usersRouter);
 app.use(`${API}/admin`, adminRouter);
+app.use(`${API}/categories`, categoriesRoute);
+app.use(`${API}/products`, productsRouter);
+app.use(`${API}/wishlist`, wishListRouter);
 app.use("/public", express.static(__dirname + "/public"));
+
 app.use(authJwt);
+app.use(errorHandler);
 
 const hostname = process.env.HOSTNAME;
 const port = env.PORT;

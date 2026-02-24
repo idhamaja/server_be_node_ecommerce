@@ -74,3 +74,32 @@ exports.deleteCategories = async function (req, res) {
     return res.status(500).json({ type: error.name, message: error.message });
   }
 };
+
+exports.getCategories = async function (req, res) {
+  try {
+    const categories = await Category.find();
+    if(!categories){
+      return res.status(404).json({ message: "Categories are NOT found" });
+    }
+    return res.json(categories);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ type: error.name, message: error.message });
+  }
+};
+
+exports.getCategoryById = async function (req, res) {
+  try {
+    if (!mongoose.isValidObjectId(req.params.id)) {
+      return res.status(404).json({ message: "Category is NOT found" });
+    }
+    const category = await Category.findById(req.params.id);
+    if (!category || category.markedForDeletion) {
+      return res.status(404).json({ message: "Category is NOT found" });
+    }
+    return res.json(category);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ type: error.name, message: error.message });
+  }
+};

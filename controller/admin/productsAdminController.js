@@ -229,6 +229,18 @@ exports.deleteProduct = async function (req, res) {
 
 exports.getProducts = async function (req, res) {
   try {
+    const page = req.query.page || 1;
+    const pageSize = req.query.pageSize || 10;
+
+    const products = await Product.find()
+      .select("-reviews -rating")
+      .skip((page - 1) * pageSize)
+      .limit(pageSize);
+
+    if (!products) {
+      return res.status(404).json({ message: "No Products found" });
+    }
+    return res.json(products);
   } catch (error) {
     console.error(error);
     return res.status(500).json({ type: error.name, message: error.message });

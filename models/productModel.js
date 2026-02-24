@@ -77,8 +77,6 @@ productSchema.pre("save", async function (next) {
     // Simpan jumlah review
     this.numberOfReviews = this.reviews.length;
   }
-
-  next(); // lanjutkan save
 });
 
 /**
