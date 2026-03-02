@@ -7,6 +7,7 @@ const { Category } = require("../models/categoryModel");
 // Import model Product dari Mongoose
 const { Product } = require("../models/productModel");
 const { default: mongoose } = require("mongoose");
+const { CartProduct } = require("../models/cartProductModel");
 
 // Menjadwalkan cron job setiap hari jam 00:00
 cron.schedule("0 0 * * * ", async function () {
@@ -41,6 +42,45 @@ cron.schedule("*30 * * * *", async function () {
   session.startTransaction();
 
   try {
+    console.log("Reservation Release CRON Job started Boss!! at", new Date());
+
+    const expiredRESERVATION = await CartProduct.find({
+      reserved: true,
+      reservationExpiry: { $lte: new Date() },
+    }).session(session);
+
+    //
+    for (const cartProduct of expiredRESERVATION) {
+      const product = await Product.findById(cartProduct.product).session(
+        session,
+      );
+
+      if (!product) {
+        const udpatedPRODUCT = await Product.findByIdAndUpdate(
+          product._id,
+          {
+            $inc: { $countInStock: cartProduct.quantity },
+          },
+          { new: true, runValidators: true, session },
+        );
+
+        if (!udpatedPRODUCT) {
+          console.error(
+            "Error Occured: Product update FAILED. Potential concurrency issue. Please warn your Admin to stop touching buttons",
+          );
+          await session.abortTransaction();
+          return;
+        }
+      }
+      await CartProduct.findByIdAndUpdate(
+        cartProduct._id,
+        { reserved: false },
+        { session },
+      );
+    }
+    await session.commitTransaction();
+
+    console.log("Reservation RELEASE CRON Job completed BOSS!! at", new Date());
   } catch (error) {
     console.error(error);
     await session.abortTransaction();

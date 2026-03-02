@@ -1,0 +1,173 @@
+const jwt = require("jsonwebtoken");
+const stripe = require("stripe")(process.env.STRIPE_KEY);
+
+const { User } = require("../models/user");
+const { Product } = require("../models/productModel");
+
+exports.checkout = async function (req, res) {
+  const accessToken = req.header("Authorization").replace("Bearer", "").trim();
+  const tokenData = jwt.decode(accessToken);
+
+  const user = await User.findById(tokenData.id);
+  if (!user) {
+    return res.status(404).json({ message: "User is NOT Found" });
+  }
+
+  for (const cartItem of req.body.cartItems) {
+    const product = await Product.findById(cartItem.product);
+    if (!product) {
+      return res
+        .status(404)
+        .json({ message: `${cartItem.productName} not found` });
+    } else if (!cartItem.reserved && product.countInStock < cartItem.quantity) {
+      const message = `${product.name}\nOrder for ${cartItem.quantity} but ${product.countInStock} left in Stock`;
+
+      return res.status(400).json({
+        message,
+      });
+    }
+  }
+
+  let customerId;
+  if (user.paymentCustomerId) {
+    customerId = user.paymentCustomerId;
+  } else {
+    const customer = await stripe.customers.create({
+      metadata: { userId: tokenData.id },
+    });
+    customerId = customer.id;
+  }
+
+  const session = await stripe.checkout.session.create({
+    line_items: req.body.cartItems.map((item) => {
+      return {
+        price_data: {
+          currency: "idr",
+          product_data: {
+            name: item.name,
+            image: item.image,
+            metadata: {
+              productId: item.productId,
+              cartProductId: item.cartProductId,
+              selectedSize: item.selectedSize ?? undefined,
+              selectedColor: item.selectedColor ?? undefined,
+            },
+          },
+          unit_amout: (item.price * 100).toFixed(0),
+        },
+        quantity: item.quantity,
+      };
+    }),
+    payment_method_options: {
+      card: { setup_future_usage: "on_session" },
+    },
+    billing_address_collection: "auto",
+    shipping_address_collection: {
+      allowed_countries: [
+        "AU",
+        "AT",
+        "BE",
+        "BR",
+        "BG",
+        "CA",
+        "CI",
+        "HR",
+        "CY",
+        "CZ",
+        "DK",
+        "EE",
+        "FI",
+        "FR",
+        "DE",
+        "GH",
+        "GI",
+        "GR",
+        "HK",
+        "HU",
+        "IN",
+        "ID",
+        "IE",
+        "IT",
+        "JP",
+        "KE",
+        "LV",
+        "LI",
+        "LT",
+        "LU",
+        "MY",
+        "MT",
+        "MX",
+        "NL",
+        "NZ",
+        "NG",
+        "NO",
+        "PL",
+        "PT",
+        "RO",
+        "SG",
+        "SK",
+        "SI",
+        "ZA",
+        "ES",
+        "SE",
+        "CH",
+        "TH",
+        "AE",
+        "GB",
+        "US",
+      ],
+    },
+    phone_number_collection: { enabled: true },
+    customer: customerId,
+    mode: "payment",
+    success_url: "https://dbestech.biz/payment-success",
+    cancel_url: "https://dbestech.biz/cart",
+  });
+  res.status(201).json({ url: session.url });
+};
+
+exports.webhook = function (req, res) {
+  const sigStripe = request.headers["stripe-signature"];
+  const endpointSecret = process.env.STRIPE_WEBHOOK_KEY;
+  let event;
+
+  try {
+    event = stripe.webhooks.constructEvent(
+      request.body,
+      sigStripe,
+      endpointSecret,
+    );
+  } catch (error) {
+    console.error("Webhook error:", error.message);
+    response.status(400).send(`Webhook Error: ${error.message}`);
+    return;
+  }
+
+  if (event.type == "checkout.session.complete") {
+    const session = event.data.object;
+
+    stripe.customers.retrieve(session.customer).then(async (customer) => {
+      const line_items = await stripe.checkout.session.listLineItems(
+        session.id,
+        { expand: ["data.price.product"] },
+      );
+
+      const orderItems = line_items.data.map((item) => {
+        return {
+          quantity: item.quantity,
+          product: item.price.product.metadata.productId,
+          cartProductId: item.price.product.cartProductId,
+          productPrice: item.price.unit_amout / 100,
+          productName: item.price.product.name,
+          productImage: item.price.product.image[0],
+          selectedSize: item.price.product.metadata.selectedSize ?? undefined,
+          selectedColor: item.price.product.metadata.selectedColor ?? undefined,
+        };
+      });
+
+      //
+      const address =
+        session.shipping_details?.address ?? session.customer_details.address;
+    });
+  }
+};

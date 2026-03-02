@@ -12,8 +12,10 @@ const usersRouter = require("./routes/usersRoutes");
 const adminRouter = require("./routes/adminRoutes");
 // const cartController = require("./controller/cartController");
 const wishListRouter = require("./routes/wishlistRoute");
-const categoriesRoute = require("./routes/categoriesRoute");
+const categoriesRouter = require("./routes/categoriesRoute");
 const productsRouter = require("./routes/productsRoute");
+const checkoutRouter = require("./routes/checkoutRoutes.js");
+const authorizePostRequests = require("./middlewares/authorization.js");
 
 const app = express();
 const env = process.env;
@@ -26,12 +28,14 @@ app.use(cors());
 app.use(`${API}/`, authRouter);
 app.use(`${API}/users`, usersRouter);
 app.use(`${API}/admin`, adminRouter);
-app.use(`${API}/categories`, categoriesRoute);
+app.use(`${API}/categories`, categoriesRouter);
 app.use(`${API}/products`, productsRouter);
 app.use(`${API}/wishlist`, wishListRouter);
+app.use(`${API}/checkout`, checkoutRouter);
 app.use("/public", express.static(__dirname + "/public"));
 
 app.use(authJwt);
+app.use(authorizePostRequests);
 app.use(errorHandler);
 
 const hostname = process.env.HOSTNAME;
