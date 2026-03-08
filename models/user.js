@@ -31,9 +31,8 @@ const userSchema = Schema({
   // bukan password asli demi keamanan
   passwordHash: { type: String, required: true },
 
-  paymentCustomerId: String,
-
   //👉 Semua ini optional (tidak required).
+  paymentCustomerId: String,
   street: String,
   apartment: String,
   postalCode: String,

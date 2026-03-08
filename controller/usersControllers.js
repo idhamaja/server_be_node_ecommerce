@@ -1,4 +1,5 @@
 const { User } = require("../models/user");
+const stripe = require("stripe")(process.env.STRIPE_KEY);
 
 /**
  * GET /users
@@ -110,8 +111,32 @@ exports.deleteUser = async function (req, res) {
 
     await Token.deleteOne({ userId: userId });
     await User.deleteOne({ _id: userId });
-    
+
     return res.status(204).end();
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ type: error.name, message: error.message });
+  }
+};
+
+exports.getPaymentProfile = async function (req, res) {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      return res.status(404).json({ message: "User is NOT Found" });
+    } else if (!user.paymentCustomerId) {
+      return res.status(404).json({
+        message:
+          "You do not have a payment profile yet. Complete an Order to see your payment profile",
+      });
+    }
+
+    const session = await stripe.billingPortal.sessions.create({
+      customer: user.paymentCustomerId,
+      return_url: "https://dbestech.biz/ecomly",
+    });
+
+    return res.json({ url: session.url });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ type: error.name, message: error.message });

@@ -8,6 +8,7 @@ const cartController = require("../controller/cartController.js");
 router.get("/", userController.getUsers);
 router.get("/:id", userController.getUserById);
 router.put("/:id", userController.updateUser);
+router.get("/:id.paymentProfile", userController.getPaymentProfile);
 
 //wishlist
 router.get("/:id/wishlist", wishlistController.getUserWishList);

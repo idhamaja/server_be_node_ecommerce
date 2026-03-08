@@ -15,6 +15,7 @@ const wishListRouter = require("./routes/wishlistRoute");
 const categoriesRouter = require("./routes/categoriesRoute");
 const productsRouter = require("./routes/productsRoute");
 const checkoutRouter = require("./routes/checkoutRoutes.js");
+const ordersRouter = require("./routes/ordersRoute.js");
 const authorizePostRequests = require("./middlewares/authorization.js");
 
 const app = express();
@@ -32,6 +33,7 @@ app.use(`${API}/categories`, categoriesRouter);
 app.use(`${API}/products`, productsRouter);
 app.use(`${API}/wishlist`, wishListRouter);
 app.use(`${API}/checkout`, checkoutRouter);
+app.use(`${API}/orders`, ordersRouter);
 app.use("/public", express.static(__dirname + "/public"));
 
 app.use(authJwt);

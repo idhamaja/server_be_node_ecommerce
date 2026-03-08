@@ -90,3 +90,48 @@ exports.addOrder = async function (orderData) {
     await session.endSession();
   }
 };
+
+exports.getUserOrders = async function (req, res) {
+  try {
+    const orders = await Order.find({ user: req.params.userId })
+      .select("orderItems status totalPrice dateOrdered")
+      .populate({ path: "orderItems", select: "productName, productImage" })
+      .sort({ dateOrdered: -1 });
+
+    if (!orders) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    const completed = [];
+    const active = [];
+    const cancelled = [];
+
+    for (const order of orders) {
+      if (order.status == "delivered") {
+        completed.push(order);
+      } else if (["cancelled", "expired"].includes(order.status)) {
+        cancelled.push(order);
+      } else {
+        active.push(order);
+      }
+    }
+    return res.json({ total: orders.length, active, completed, cancelled });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ type: error.name, error: error.message });
+  }
+};
+
+//get order by ID
+exports.getOrderById = async function (req, res) {
+  try {
+    const order = await Order.findById(req, params.id).populate("orderItems");
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+    return res.json(order);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ type: error.name, message: error.message });
+  }
+};
